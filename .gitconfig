@@ -1,0 +1,11 @@
+[credential]
+	helper = osxkeychain
+[user]
+	name = Gregor May
+	email = mail@gregormay.com
+[core]
+	hooksPath = /Users/gregormay/.git_hooks
+[init]
+	defaultBranch = main
+[alias]
+	llm = "!f() { \\\n    if git diff --cached --quiet; then \\\n        echo \"No changes staged. Please stage changes first.\"; \\\n        return 1; \\\n    fi; \\\n    commit_msg=$(git diff --cached | llm -s \"$(cat ~/.config/prompts/commit-system-prompt.txt)\"); \\\n    echo \"=== Generated Commit Message ===\"; \\\n    echo \"$commit_msg\"; \\\n    echo \"================================\"; \\\n    echo \"\"; \\\n    read -p \"Commit with this message? [Y/n] \" confirm; \\\n    if [[ $confirm =~ ^[Nn]$ ]]; then \\\n        echo \"Commit aborted.\"; \\\n        return 1; \\\n    fi; \\\n    git commit -m \"$commit_msg\"; \\\n}; f"
