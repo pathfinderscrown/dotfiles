@@ -1,0 +1,89 @@
+#!/bin/sh
+# Git hook: prepare-commit-msg
+# Automatically generates commit messages using LLM based on staged changes
+# 
+# To skip this hook for a single commit:
+#   SKIP_LLM_GITHOOK=1 git commit
+# Or provide your own message:
+#   git commit -m "your message"
+
+# Exit if the SKIP_LLM_GITHOOK environment variable is set
+if [ ! -z "$SKIP_LLM_GITHOOK" ]; then
+    exit 0
+fi
+
+# ANSI color codes for styling the output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Function to display a spinning animation during LLM processing
+spin_animation() {
+    spinner=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
+    while true; do
+        for i in "${spinner[@]}"; do
+            tput civis # Hide cursor
+            tput el1 # Clear line
+            printf "\\r${YELLOW}%s${NC} Generating commit message with Claude..." "$i"
+            sleep 0.1
+            tput cub 40 # Move cursor back
+        done
+    done
+}
+
+# Check if this is a merge commit (has a second argument)
+if [ -n "$2" ]; then
+    exit 0 # Exit for merge commits
+fi
+
+# Check if llm command is installed
+if ! command -v llm &> /dev/null; then
+    echo "${RED}Error: 'llm' command is not installed.${NC}"
+    echo "Install it with: pipx install llm"
+    exit 1
+fi
+
+# Check if the system prompt file exists
+PROMPT_FILE="$HOME/.config/prompts/commit-system-prompt.txt"
+if [ ! -f "$PROMPT_FILE" ]; then
+    echo "${RED}Error: System prompt file not found at $PROMPT_FILE${NC}"
+    echo "Please create the prompt file first."
+    exit 1
+fi
+
+# Start the spinning animation in the background
+spin_animation &
+spin_pid=$!
+
+# Generate commit message using git diff and llm
+if ! commit_msg=$(git diff --cached | llm -s "$(cat $PROMPT_FILE)" 2>&1); then
+    # Stop the animation
+    kill $spin_pid
+    wait $spin_pid 2>/dev/null
+    
+    # Show cursor and report error
+    tput cnorm
+    printf "\\n"
+    printf "${RED}Error: Failed to generate commit message:\\n${commit_msg}${NC}\\n\\n"
+    echo "Please manually set the commit message or check your llm configuration."
+    exit 1
+fi
+
+# Stop the animation
+kill $spin_pid
+wait $spin_pid 2>/dev/null
+
+# Show cursor
+tput cnorm
+echo
+
+# Display the generated commit message
+echo "${BLUE}=== Generated Commit Message ===${NC}"
+echo "${GREEN}$commit_msg${NC}"
+echo "${BLUE}=================================${NC}"
+echo
+
+# Write the commit message to the file
+echo "$commit_msg" > "$1"
