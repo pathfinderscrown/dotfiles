@@ -26,7 +26,7 @@ spin_animation() {
         for i in "${spinner[@]}"; do
             tput civis # Hide cursor
             tput el1 # Clear line
-            printf "\\r${YELLOW}%s${NC} Generating commit message with Claude..." "$i"
+            printf "\\r${YELLOW}%s${NC} Generating commit message with LLM..." "$i"
             sleep 0.1
             tput cub 40 # Move cursor back
         done
