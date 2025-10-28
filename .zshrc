@@ -9,6 +9,14 @@ fi
 
 # ===== CUSTOM ZSH CONFIGURATION PATHS =====
 
+# Homebrew completions
+if type brew &>/dev/null; then
+  FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+  autoload -Uz compinit
+  compinit
+fi
+
+# Define Custom Directories
 export ZSH_CUSTOM_DIR="$HOME/Documents/Scripts/zsh" # Define custom zsh directory
 export ZSH="$ZSH_CUSTOM_DIR/.oh-my-zsh" # Update Oh My Zsh path
 export ZPLUG_HOME="$ZSH_CUSTOM_DIR/.zplug" # Update Zplug path (if you use it)
@@ -24,8 +32,6 @@ fi
 
 # Set name of the theme to load --- if set to "random", it will
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-#ZSH_THEME="sobole"
-# SOBOLE_THEME_MODE=dark
 ZSH_THEME="powerlevel10k/powerlevel10k" 
 
 
@@ -183,3 +189,4 @@ source $HOME/Documents/Scripts/zsh-syntax-highlighting/zsh-syntax-highlighting.z
 
 # Created by `pipx` on 2025-10-27 08:21:57
 export PATH="$PATH:/Users/gregormay/.local/bin"
+alias code-chat='ollama run codeqwen:latest'
