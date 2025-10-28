@@ -94,7 +94,6 @@ plugins=(
   Alias-finder
   Colored-man-pages
   emoji
-  macos
   jsontools
   zsh-autosuggestions
   zsh-syntax-highlighting  
