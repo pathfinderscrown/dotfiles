@@ -4,7 +4,7 @@
 	name = Gregor May
 	email = mail@gregormay.com
 [core]
-	hooksPath = /Users/gregormay/.git_hooks
+	hooksPath = /Users/gregormay/Documents/Scripts/dotfiles/.git_hooks
 [init]
 	defaultBranch = main
 [alias]
